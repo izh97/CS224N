@@ -89,6 +89,18 @@ def getNegativeSamples(outsideWordIdx, dataset, K):
     return negSampleWordIndices
 
 
+def getNegativeSamples(outsideWordIdx, dataset, K):
+    """ Samples K indexes which are not the outsideWordIdx """
+
+    negSampleWordIndices = [None] * K
+    for k in range(K):
+        newidx = dataset.sampleTokenIdx()
+        while newidx == outsideWordIdx:
+            newidx = dataset.sampleTokenIdx()
+        negSampleWordIndices[k] = newidx
+    return negSampleWordIndices
+
+
 def negSamplingLossAndGradient(
     centerWordVec,
     outsideWordIdx,
@@ -116,10 +128,20 @@ def negSamplingLossAndGradient(
     indices = [outsideWordIdx] + negSampleWordIndices
 
     ### YOUR CODE HERE (~10 Lines)
+    # I recalculate the gradient for repeated indices, probably there are more efficient approaches
+    U_concat = outsideVectors[indices]
+    U_concat[1:,None] *= -1 #Negate all but the first(the outside words) word embeddings
 
-    ### Please use your implementation of sigmoid in here.
-    loss = -log(sigmoid(centerWordVec @ outsideVectors.T)) -
+    S = sigmoid(centerWordVec@U_concat.T)
+    loss = -(np.log(S)).sum()
+    gradCenterVec = (1-S)@-U_concat
 
+    gradOutsideVecs = np.zeros_like(outsideVectors) #init the matrix
+    gradOutsideVecs[outsideWordIdx] -= (1-S[0])*centerWordVec 
+    neg_gradients = np.outer((1-S[1:,None]),centerWordVec)
+    np.add.at(gradOutsideVecs, negSampleWordIndices, neg_gradients) #utilize a trick with np.add
+    # if you simply try gradOutsideVecs[negSampleWordIndices] += it will overwrite entries for same indices
+    # instead of adding them
     ### END YOUR CODE
 
     return loss, gradCenterVec, gradOutsideVecs
@@ -165,6 +187,15 @@ def skipgram(currentCenterWord, windowSize, outsideWords, word2Ind,
     gradOutsideVectors = np.zeros(outsideVectors.shape)
 
     ### YOUR CODE HERE (~8 Lines)
+    centerWordVec = centerWordVectors[word2Ind[currentCenterWord]]
+    for outsideWord in outsideWords:
+        loss_i, gradCenterVec_i, gradOutsideVectors_i = word2vecLossAndGradient(centerWordVec,
+                                                                               word2Ind[outsideWord],
+                                                                               outsideVectors,
+                                                                               dataset)
+        loss += loss_i
+        gradCenterVecs[word2Ind[currentCenterWord]] += gradCenterVec_i
+        gradOutsideVectors += gradOutsideVectors_i
 
     ### END YOUR CODE
     
