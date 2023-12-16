@@ -82,9 +82,9 @@ class NMT(nn.Module):
         ###         https://pytorch.org/docs/stable/nn.html#torch.nn.Dropout
         ###     Conv1D Layer:
         ###         https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-        self.post_embed_cnn = nn.Conv1D(embed_size, embed_size, 2, padding = "same")
+        self.post_embed_cnn = nn.Conv1d(embed_size, embed_size, 2, padding = "same")
         self.encoder = nn.LSTM(embed_size, hidden_size, bias = True, bidirectional = True)
-        self.decoder = nn.LSTM(embed_size + hidden_size, hidden_size, bias = True)
+        self.decoder = nn.LSTMCell(embed_size + hidden_size, hidden_size, bias = True)
         self.h_projection = nn.Linear(2*hidden_size, hidden_size, bias = False)
         self.c_projection = nn.Linear(2*hidden_size, hidden_size, bias = False)
         self.att_projection = nn.Linear(2*hidden_size, hidden_size, bias = False)
@@ -338,6 +338,7 @@ class NMT(nn.Module):
         enc_hiddens_proj = enc_hiddens_proj.permute(0,2,1)
         e_t = torch.bmm(dec_hidden, enc_hiddens_proj)
         e_t = torch.squeeze(e_t, dim =1)
+        dec_hidden = torch.squeeze(dec_hidden, dim = 1)
         ### END YOUR CODE
 
         # Set e_t to -inf where enc_masks has 1
