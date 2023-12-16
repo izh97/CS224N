@@ -35,13 +35,10 @@ def pad_sents(sents, pad_token):
     sents_padded = []
 
     ### YOUR CODE HERE (~6 Lines)
-    sent_lens = [len(i) for i in sents]
-    max_batch_len = max(sent_lens)
-    for i, sent_len in enumerate(sent_lens):
-        pad = [pad_token]*(max_batch_len - sent_len)
-        sents[i].extend(pad)
-    sents_padded = sents
-
+    max_len = len(max(sents, key = len))
+    for sent in sents:
+        pad = [pad_token]*(max_len - len(sent))
+        sents_padded.append(sent + pad)
     ### END YOUR CODE
 
     return sents_padded

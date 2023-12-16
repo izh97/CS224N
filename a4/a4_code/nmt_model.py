@@ -194,7 +194,6 @@ class NMT(nn.Module):
         enc_hiddens, (last_hidden, last_cell) = self.encoder(X)
         enc_hiddens, _ = pad_packed_sequence(enc_hiddens)
         enc_hiddens = enc_hiddens.permute(1,0,2)
-
         last_hidden = torch.cat((last_hidden[0], last_hidden[1]), dim = 1)
         last_cell = torch.cat((last_cell[0], last_cell[1]), dim = 1)
         init_decoder_hidden = self.h_projection(last_hidden)
@@ -276,7 +275,6 @@ class NMT(nn.Module):
             combined_outputs.append(o_t)
             o_prev = o_t
         combined_outputs = torch.stack(combined_outputs, dim = 0)
-
         ### END YOUR CODE
 
         return combined_outputs
@@ -334,11 +332,8 @@ class NMT(nn.Module):
         ###         https://pytorch.org/docs/stable/torch.html#torch.squeeze
         dec_state = self.decoder(Ybar_t, dec_state)
         dec_hidden, dec_cell = dec_state
-        dec_hidden = torch.unsqueeze(dec_hidden, dim = 1)
-        enc_hiddens_proj = enc_hiddens_proj.permute(0,2,1)
-        e_t = torch.bmm(dec_hidden, enc_hiddens_proj)
-        e_t = torch.squeeze(e_t, dim =1)
-        dec_hidden = torch.squeeze(dec_hidden, dim = 1)
+        e_t = torch.bmm(enc_hiddens_proj, dec_hidden.unsqueeze(2))
+        e_t = torch.squeeze(e_t, dim = 2)
         ### END YOUR CODE
 
         # Set e_t to -inf where enc_masks has 1
