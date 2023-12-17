@@ -1,0 +1,12 @@
+name: local_a5
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.8
+  - pytorch
+  - numpy
+  - scipy
+  - nltk
+  - torchvision
+  - pip
