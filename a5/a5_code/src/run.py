@@ -32,7 +32,7 @@ args = argp.parse_args()
 
 # Save the device
 device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
-
+model = model.to(device)
 # TensorBoard training log
 writer = SummaryWriter(log_dir='expt/%s/%s_%s_%d_pt_lr_%f_ft_lr_%f' % (
     args.function,
@@ -76,13 +76,14 @@ else:
 
 # Perform pretraining, finetuning, or evaluation
 if args.function == 'pretrain':
+    assert args.writing_params_path is not None
     tconf = trainer.TrainerConfig(max_epochs=650, batch_size=128, learning_rate=args.pretrain_lr,
                       lr_decay=True, warmup_tokens=512*20, final_tokens=2*len(pretrain_dataset)*block_size,
                       num_workers=4, writer = writer, ckpt_path = args.writing_params_path)
     pretrain = trainer.Trainer(mymodel, args.pretrain_corpus_path, None, tconf)
     pretrain.train()
     pretrain.save_checkpoint()
-    #assert args.writing_params_path is not None
+
     # TODO [part f]:
     # - Given:
     #     1. A corpus specified in args.pretrain_corpus_path
@@ -103,6 +104,8 @@ if args.function == 'pretrain':
     # writer=writer 
     #raise NotImplementedError
 elif args.function == 'finetune':
+    assert args.writing_params_path is not None
+    assert args.finetune_corpus_path is not None
     tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
                 lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
                 num_workers=4, writer = writer, ckpt_path = args.writing_params_path)
