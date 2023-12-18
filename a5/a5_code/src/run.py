@@ -64,16 +64,25 @@ Don't change above here; write your code below
 # note: models should moved to device defined on line 34.
 
 if args.variant == 'vanilla':
-    pass # [part c] Make some model here
+    mymodel = model.GPT(mconf)  # [part c] Make some model here
 elif args.variant == 'perceiver':
+    mconf.perceiver = True
+    mconf.bottleneck_dim = args.bottleneck_dim
+    mymodel = model.GPT(mconf)
     # set mconf.perceiver, and mconf.bottleneck_dim parameters appropriately.
-    pass # [part g] Make some other model here
+    # [part g] Make some other model here
 else:
     raise ValueError("Unknown model variant")
 
 # Perform pretraining, finetuning, or evaluation
 if args.function == 'pretrain':
-    assert args.writing_params_path is not None
+    tconf = trainer.TrainerConfig(max_epochs=650, batch_size=128, learning_rate=args.pretrain_lr,
+                      lr_decay=True, warmup_tokens=512*20, final_tokens=2*len(pretrain_dataset)*block_size,
+                      num_workers=4, writer = writer, ckpt_path = args.writing_params_path)
+    pretrain = trainer.Trainer(mymodel, args.pretrain_corpus_path, None, tconf)
+    pretrain.train()
+    pretrain.save_checkpoint()
+    #assert args.writing_params_path is not None
     # TODO [part f]:
     # - Given:
     #     1. A corpus specified in args.pretrain_corpus_path
@@ -92,10 +101,19 @@ if args.function == 'pretrain':
     # final_tokens=200*len(pretrain_dataset)*block_size
     # num_workers=4
     # writer=writer 
-    raise NotImplementedError
+    #raise NotImplementedError
 elif args.function == 'finetune':
-    assert args.writing_params_path is not None
-    assert args.finetune_corpus_path is not None
+    tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
+                lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
+                num_workers=4, writer = writer, ckpt_path = args.writing_params_path)
+    if args.reading_params_path:
+        tconf.max_epochs = 10
+        checkpoint = torch.load(args.reading_params_path)
+        mymodel.load_state_dict(checkpoint)
+    finetune = trainer.Trainer(mymodel, args.finetune_corpus_path, None, tconf)
+    finetune.train()
+    finetune.checkpoint()
+
     # TODO [part c] [part f]:
     # - Given:
     #     1. A finetuning corpus specified in args.finetune_corpus_path
@@ -129,7 +147,6 @@ elif args.function == 'finetune':
     #     You can use the args.reading_params_path flag to switch between the
     #     number of epochs for each case.
      
-    raise NotImplementedError
 elif args.function == 'evaluate':
     assert args.outputs_path is not None
     assert args.reading_params_path is not None

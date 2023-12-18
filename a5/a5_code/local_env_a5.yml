@@ -1,4 +1,4 @@
-name: local_a5
+name: local_a5_new
 channels:
   - pytorch
   - defaults
@@ -10,3 +10,7 @@ dependencies:
   - nltk
   - torchvision
   - pip
+  - pip:
+    - sentencepiece
+    - sacrebleu
+    - tensorboard
