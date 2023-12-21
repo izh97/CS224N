@@ -18,6 +18,11 @@
                 	\btheta_{t+1} &\gets \btheta_t - \alpha \bm_{t+1}
                 }
                 where $\beta_1$ is a hyperparameter between 0 and 1 (often set to  0.9). Briefly explain in 2--4 sentences (you don't need to prove mathematically, just give an intuition) how using $\bm$ stops the updates from varying as much and why this low variance may be helpful to learning, overall.\newline
+                \begin{shaded}
+                \begin{answer}
+                It could be that a particular mini-batch is "unlucky" - i.e., it is a particularly big outlier from the rest of our data, resulting in abnormally big gradients and thus abnormally big parameter updates, which also increases the update variance. m represents the weighted average of the gradients up until the current minibatch, and the gradients on the current minibatch, therefore reducing the influence that any single minibatch of data can have on our parameter updates. 
+                \end{answer}
+                \end{shaded}
               
                 
             \subpart[2] Adam extends the idea of {\it momentum} with the trick of {\it adaptive learning rates} by keeping track of  $\bv$, a rolling average of the magnitudes of the gradients:
@@ -27,7 +32,12 @@
                 	\btheta_{t+1} &\gets \btheta_t - \alpha \bm_{t+1} / \sqrt{\bv_{t+1}}
                 }
                 where $\odot$ and $/$ denote elementwise multiplication and division (so $\bz \odot \bz$ is elementwise squaring) and $\beta_2$ is a hyperparameter between 0 and 1 (often set to  0.99). Since Adam divides the update by $\sqrt{\bv}$, which of the model parameters will get larger updates?  Why might this help with learning?
-                
+                \begin{shaded}
+                \begin{answer}
+                Dividing by $\sqrt{\bv}$ means giving model parameters with relatively smaller gradient magnitude 
+                relatively bigger changes, and vice versa. This addresses the scale invariance of gradient updates and helps us avoid plateauing and getting stuck in the loss function.
+                \end{answer}
+                \end{shaded}
            
                 
                 \end{subparts}
@@ -47,10 +57,29 @@
             \begin{subparts}
             \subpart[2]
                 What must $\gamma$ equal in terms of $p_{\text{drop}}$? Briefly justify your answer or show your math derivation using the equations given above.
+                \begin{shaded}
+                \begin{answer}
+                \alns{
+                	\mathbb{E}_{p_{\text{drop}}}[\gamma \bd \odot \bh]_i = h_i \text{\phantom{aaaa}}
+                }
+                \alns{
+                	\gamma(1-p_{\text{drop}})h_i = h_i \text{\phantom{aaaa}}
+                }
+                \alns{
+                	\gamma = \frac{1}{(1-p_{\text{drop}}) }\text{\phantom{aaaa}}
+                }
+                Overall, this adjustment ensures that the output at test time is the same as the expected output at training time .
+                
+                \end{answer}
+                \end{shaded}
                 
             
           \subpart[2] Why should dropout be applied during training? Why should dropout \textbf{NOT} be applied during evaluation? (Hint: it may help to look at the paper linked above in the write-up.) \newline
-          
+                \begin{shaded}
+                \begin{answer}
+                During training, dropout helps neural nets prevent overfitting by means of too much hidden unit co-adaptation. At test time however, we would ofcourse like to have the full power, i.e. all units, of our network available.
+                \end{answer}
+                \end{shaded}
          
         \end{subparts}
 

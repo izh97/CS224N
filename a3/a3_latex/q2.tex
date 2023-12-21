@@ -32,10 +32,34 @@ On each step, your parser will decide among the three transitions using a neural
     $[$ROOT, I, attended] & [lectures, in, the, NLP, class] &  &  \texttt{SHIFT}  \\
     $[$ROOT, attended] & [lectures, in, the, NLP, class] & attended$\to$I &  \texttt{LEFT-ARC}  \\
     \end{tabular}\newline
+    
+    \begin{shaded}
+    \begin{answer}\newline\newline
+    \begin{tabular}{ l | l | l | l}
+    Stack & Buffer & New dependency & Transition \\ \hline
+    [ROOT, attented, lectures] & [in, the, NLP, class] &  & \texttt{SHIFT} \\
+    $[$ROOT, attented] & [in, the, NLP, class] & attended$\to$lectures & \texttt{RIGHT-ARC} \\
+    $[$ROOT, attented, in] & [the, NLP, class] & & \texttt{SHIFT} \\
+    $[$ROOT, attented, in, the] & [NLP, class] & & \texttt{SHIFT} \\
+    $[$ROOT, attented, in, the, NLP] & [class] & & \texttt{SHIFT} \\
+    $[$ROOT, attented, in, the, NLP, class] & [] & & \texttt{SHIFT} \\
+    $[$ROOT, attented, in, the, class] & [] & class$\to$NLP & \texttt{LEFT-ARC} \\
+    $[$ROOT, attented, in, class] & [] & class$\to$the & \texttt{LEFT-ARC} \\
+    $[$ROOT, attented, class] & [] & class$\to$in & \texttt{LEFT-ARC} \\
+    $[$ROOT, attented] & [] & attended$\to$class & \texttt{RIGHT-ARC} \\
+    $[$ROOT] & [] & ROOT$\to$attended & \texttt{RIGHT-ARC} \\
+    
 
+    \end{tabular}
+    \end{answer}
+    \end{shaded}
     
     \part[2] A sentence containing $n$ words will be parsed in how many steps (in terms of $n$)? Briefly explain in 1--2 sentences why.
-
+    \begin{shaded}
+    \begin{answer}
+    $2n$ steps, as each of the $n$ words will have one step where it gets shifted from the buffer to our current stack, and one step where it is removed through either left or right-arc.
+    \end{answer}
+    \end{shaded}
        
     
     \part[6] Implement the \texttt{\_\_init\_\_} and \texttt{parse\_step} functions in the \texttt{PartialParse} class in \texttt{parser\_transitions.py}. This implements the transition mechanics your parser will use. You can run basic (non-exhaustive) tests by running \texttt{python parser\_transitions.py part\_c}.
@@ -194,8 +218,42 @@ In particular, you \textbf{do not} need to look at the labels on the the depende
 \medskip
 
 \input{dep_parses.tex}
-
+\begin{shaded}
+\begin{answer}
+\begin{enumerate}[i.]
+    \item 
+        \begin{itemize}
+        \item \textbf{Error type}: Verb Phrase Attachment Error 
+        \item \textbf{Incorrect dependency}: acquisition $\rightarrow$ citing 
+        \item \textbf{Correct dependency}: blocked $\rightarrow$ citing
+        \end{itemize}
+    \item 
+        \begin{itemize}
+        \item \textbf{Error type}: Modifier Attachment Error
+        \item \textbf{Incorrect dependency}: left $\rightarrow$ early 
+        \item \textbf{Correct dependency}: afternoon $\rightarrow$ early
+        \end{itemize}
+    \item 
+        \begin{itemize}
+        \item \textbf{Error type}: Prepositional Phrase Attachment Error 
+        \item \textbf{Incorrect dependency}: declined $\rightarrow$ decision 
+        \item \textbf{Correct dependency}: reasons $\rightarrow$ decision
+        \end{itemize}   
+    \item 
+        \begin{itemize}
+        \item \textbf{Error type}: Coordination Attachment error
+        \item \textbf{Incorrect dependency}: affects $\rightarrow$ one 
+        \item \textbf{Correct dependency}: plants $\rightarrow$ one
+        \end{itemize}
+        
+\end{enumerate}
+\end{answer}
+\end{shaded}
 
 \part[2] Recall in part (e), the parser uses features which includes words and their part-of-speech (POS) tags. Explain the benefit of using part-of-speech tags as features in the parser?
-
+\begin{shaded}
+\begin{answer}
+POS tags help disambiguate words with multiple meanings - i.e., if we have the "duck", which can mean both the animal or the act of bending/crouching, a POS can go a long way to help our parser make better informed decisions.
+\end{answer}
+\end{shaded}
 \end{parts}
