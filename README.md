@@ -1,5 +1,5 @@
 # CS224N
-In this repository you can find my codding and written solutions for assignments 1-5 of the Stanford CS224N class(of Winter 22/23), featuring:
+In this repository you can find my coding and written solutions for assignments 1-5 of the Stanford CS224N class(of Winter 22/23), featuring:
 * Assignment 1: Introduction to word vectors
 * Assignment 2: Derivatives and implementation of word2vec algorithm
 * Assignment 3: Dependency parcing and neural network foundations
