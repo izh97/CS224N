@@ -187,7 +187,13 @@ Prove that the naive-softmax loss (Equation \ref{naive-softmax}) is the same as 
 Your answer should be one line. You may describe your answer in words.
 \begin{shaded}
 \begin{answer}
-
+\[y_w =
+\begin{cases}
+1&\text{for $w = o$}\\
+0&\text{otherwise}\\
+\end{cases} \implies  \underbrace{-\bm y_{w\not =o}}_\text{=0}\log(\hat{\bm y}_{w\not =o}) + \dots + \overbrace{-\bm y_{w =o}}^\text{=1}\log(\hat{\bm y}_{w=o}) + \dots + \underbrace{-\bm y_{w\not =o}}_\text{=0}\log(\hat{\bm y}_{w\not =o}) = -log(\hat{\bm y}_{o})
+\]
+$\bm y$ is a one-hot vector, $y_w$ is only equal to 1 in the case of $w = o$ and 0 otherwise - since we multiply by $\bm y_w$ it follows that the only term that remains is for the $w = o$ case.
 \end{answer}
 \end{shaded}
 
@@ -213,7 +219,22 @@ Hint: Consider the case where $\mathbf{u}_x = \alpha\mathbf{u}_y$ for some words
 
 \begin{shaded}
 \begin{answer}
-
+\begin{enumerate}[label=(\roman*)]
+\item 
+    \text{Simplify loss function }$\bm J(\bm v_c, o, \bm U) = -\log \frac{\exp(\bm u_{o}^\top \bm v_c)}{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)} = - \bm u_{o}^\top \bm v_c + \log{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)} \\
+     \frac{\partial \bm J(\bm v_c, o, \bm U)}{\partial \bm v_c} 
+    % = \frac{\partial -\log P(O=o| C=c)}{\partial \bm v_c} 
+    % = \frac{\partial -\log \frac{\exp(\bm u_{o}^\top \bm v_c)}{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)}}{\partial \bm v_c} =\\
+    % = \frac{\partial -\log \exp(\bm u_{o}^\top \bm v_c) + \log \sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)}{\partial \bm v_c} 
+    = \frac{\partial -\bm u_{o}^\top \bm v_c}{\partial \bm v_c} + \frac{\log \sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)}{\partial \bm v_c} =\\
+    = -\bm u_{o} + \frac{1}{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)}\frac{\sum_{x=1}^n \exp(\bm u_{x}^\top \bm v_c)}{\partial \bm v_c} 
+    = -\bm u_{o} + \frac{1}{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)} \sum_{x=1}^n \exp(\bm u_{x}^\top \bm v_c) \bm u_{x} \\
+    = -\bm u_{o} +\sum_{x=1}^n \frac{\exp(\bm u_{x}^\top \bm v_c) \bm u_{x}}{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)} \bm u_{x} =  -\bm u_{o} +\sum_{x=1}^n \hat{\bm y}_x \bm u_{x} =  \sum_{x=1}^n (-\bm y_x\bm u_{x} + \hat{\bm y}_x \bm u_{x}) =   \\
+    =  (\hat{\bm y} - \bm y )U^\top \text{(for row vector y's) }
+$
+\item 
+    The gradient is $=0$ for $\hat{\bm y} = \bm y $, i.e. whenever we predict the correct outside word with a probability of one.
+\end{enumerate}
 \end{answer}
 \end{shaded}
 
@@ -222,7 +243,15 @@ Hint: Consider the case where $\mathbf{u}_x = \alpha\mathbf{u}_y$ for some words
 
 \begin{shaded}
 \begin{answer}
-
+     $\frac{\partial \bm J(\bm v_c, o, \bm U)}{\partial \bm u_w} 
+    = \frac{\partial -\bm u_{o}^\top \bm v_c}{\partial \bm u_w} + \frac{\log \sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm u_w)}{\partial \bm u_w} =\\
+    = \frac{\partial -\bm u_{o}^\top \bm v_c}{\partial \bm u_w} + \frac{1}{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)}\frac{\sum_{x=1}^n \exp(\bm u_{x}^\top \bm v_c)}{\partial \bm u_w} 
+    = \frac{\partial -\bm u_{o}^\top \bm v_c}{\partial \bm u_w} +\sum_{x=1}^n \frac{\exp(\bm u_{x}^\top \bm v_c) \bm u_{x}}{\sum_{w \in \text{Vocab}} \exp(\bm u_{w}^\top \bm v_c)} \bm v_{c}=  \\
+  =
+\begin{cases}
+ -\bm v_{c} +\hat{ y}_w \bm v_{c} = \bm v_{c}(\hat{ y}_w - {y}_w)&\text{for $w = o$}\\
+\hat{ y}_w \bm v_{c}&\text{otherwise}\\
+\end{cases}$
 \end{answer}
 \end{shaded}
 
@@ -231,7 +260,7 @@ Hint: Consider the case where $\mathbf{u}_x = \alpha\mathbf{u}_y$ for some words
 
 \begin{shaded}
 \begin{answer}
-
+Logically, combining our answer from c) it would be $\bm v_{c}(\hat{ \bm y} - {\bm y})$
 \end{answer}
 \end{shaded}
 
@@ -253,8 +282,14 @@ Where $x$ is a scalar and $0<\alpha <1$, please compute the derivative of $f(x)$
 
 \begin{shaded}
 \begin{answer}
-
+\[\frac{\partial f(x)}{\partial x} =
+\begin{cases}
+1&\text{for $x > 0$}\\
+\alpha&\text{for $x < 0$}
+\end{cases}
+\]
 \end{answer}
+
 \end{shaded}
 
 % Question 1-F
@@ -268,8 +303,16 @@ Where $x$ is a scalar and $0<\alpha <1$, please compute the derivative of $f(x)$
 Please compute the derivative of $\sigma(x)$ with respect to $x$, where $x$ is a scalar. Please write your answer in terms of $\sigma(x)$. Show your work to receive full credit.
 
 \begin{shaded}
+
 \begin{answer}
 
+\[
+\frac{\partial \sigma(x)}{\partial x} = \frac{(1 + e^{-x})*0 - (-e^{-x})}{(1 + e^{-x})^{2}} = \frac{e^{-x}}{(1 + e^{-x})^{2}} = \frac{e^{-x} + 1 - 1}{(1 + e^{-x})^{2}} \\
+= \frac{1+e^{-x}}{(1 + e^{-x})^{2}} - \frac{1}{(1 + e^{-x})^{2}} =
+\]
+\[
+= \frac{1}{1 + e^{-x}}(1-\frac{1}{1 + e^{-x}}) = \sigma(x)(1-\sigma(x))
+\]
 \end{answer}
 \end{shaded}
 
@@ -295,7 +338,34 @@ Caveat: So far we have looked at re-using quantities and approximating softmax w
 
 \begin{shaded}
 \begin{answer}
+\begin{enumerate}[label=(\roman*)]
+\item 
+\begin{align*}
+    \frac{\partial \bm J_{\text{neg-sample}}(\bm v_c, o, \bm U)}{\partial \bm v_c} &= -\frac{\sigma(\bm u_o^{\top}\bm v_c)(1-\sigma(\bm u_o^{\top}\bm v_c))\bm u_o}{\sigma(\bm u_o^{\top}\bm v_c)} + \sum_{s=1}^{K}\frac{\sigma(-\bm u_{w_s}^{\top}\bm v_c)(1-\sigma(-\bm u_{w_s}^{\top}\bm v_c))\bm u_{w_s}}{\sigma(-\bm u_{w_s}^{\top}\bm v_c)} \\
+    &= -(1-\sigma(\bm u_o^{\top}\bm v_c))\bm u_o + \sum_{s=1}^{K} (1-\sigma(-\bm u_{w_s}^{\top}\bm v_c))\bm u_{w_s}
+\end{align*}
+Recall $o\notin\{w_1, \dots, w_K\}$, therefore we can ignore the term on the right:
+\begin{equation*}
+    \frac{\partial \bm J_{\text{neg-sample}}(\bm v_c, o, \bm U)}{\partial \bm u_o} = -(1-\sigma(\bm u_o^{\top}\bm v_c))\bm v_c
+\end{equation*}
+Recall $o\notin\{w_1, \dots, w_K\}$, therefore we can ignore the term on the left, as well as the summation, since the gradient would be 0 for every word other than $w_s$, and we sample distinct values only:
+\begin{equation*}
+    \frac{\partial \bm J_{\text{neg-sample}}(\bm v_c, o, \bm U)}{\partial \bm u_w} = (1-\sigma(\bm u_w^{\top}\bm v_c))\bm v_c
+\end{equation*}
 
+\item \color{red} We can get away with not repeating the sigmoid and innerproduct calculations
+
+\begin{equation*}
+    \frac{\partial \bm J_{\text{neg-sample}}(\bm v_c, o, \bm U)}{\partial \bm v_c} = -\bm{U}_{o, \{w_1, \dots, w_K\}}\left(\bm 1 - \sigma\left(\bm{U}_{o, \{w_1, \dots, w_K\}}^{\top}\bm v_c\right)\right)
+\end{equation*}
+
+\begin{equation*}
+    \frac{\partial \bm J_{\text{neg-sample}}(\bm v_c, o, \bm U)}{\partial \bm{U}_{o, \{w_1, \dots, w_K\}}} = -1*\bm v_c \left(\bm 1 - \sigma\left(\bm{U}_{o, \{w_1, \dots, w_K\}}^{\top}\bm v_c\right)\right)^{\top}
+\end{equation*}
+
+\item Because in Negative sampling we do not need to go through the entire dictionary, comprising of some $10^8$ words to normalize (i.e., to obtain the numerator of our naive-softmax).
+
+\end{enumerate}
 \end{answer}
 \end{shaded}
 
@@ -313,7 +383,10 @@ Compute the partial derivative of $\bm J_{\text{neg-sample}}$ with respect to a 
 
 \begin{shaded}
 \begin{answer}
-
+Recall $o\notin\{w_1, \dots, w_K\}$, therefore we can ignore the term on the left. This time, we cannot completely ignore the summation, since $w_s$ need not be distinct:
+\begin{equation*}
+    \frac{\partial \bm J_{\text{neg-sample}}(\bm v_c, o, \bm U)}{\partial \bm u_w} = \sum_{\substack{w\in\text{Vocab} \\ w=w_s}}^{K}{(1-\sigma(\bm u_w^{\top}\bm v_c)\bm v_c}
+\end{equation*}
 \end{answer}
 \end{shaded}
 
@@ -336,7 +409,11 @@ Write your answers in terms of ${\frac{\partial \bm J(\bm v_c, w_{t+j}, \bm U)}{
 
 \begin{shaded}
 \begin{answer}
-
+\begin{enumerate}[label=(\roman*)]
+\item ${\frac{\partial \bm J_{\textrm{skip-gram}}(\bm v_c, w_{t-m},\ldots w_{t+m}, \bm U)} {\partial \bm U}} = \sum_{\substack{-m\le j \le m \\ j\ne 0}} {\frac{\partial \bm J(\bm v_c, w_{t+j}, \bm U)}{\partial \bm U}}$
+\item ${\frac{\partial \bm J_{\textrm{skip-gram}}(\bm v_c, w_{t-m},\ldots w_{t+m}, \bm U)} {\partial \bm v_c}} = \sum_{\substack{-m\le j \le m \\ j\ne 0}} {\frac{\partial \bm J(\bm v_c, w_{t+j}, \bm U)}{\partial \bm v_c}}$
+\item ${\frac{\partial \bm J_{\textrm{skip-gram}}(\bm v_c, w_{t-m},\ldots w_{t+m}, \bm U)} {\partial \bm v_w}} = \bm 0$
+\end{enumerate}
 \end{answer}
 \end{shaded}
 
